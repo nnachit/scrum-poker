@@ -1,19 +1,20 @@
-version: '3.8'
-
 services:
   web:
     build: .
     container_name: scrum_poker_web
-    command: python manage.py runserver 0.0.0.0:8000
+    command: daphne -b 0.0.0.0 -p 8000 scrum_poker.asgi:application
     volumes:
       - .:/app
     ports:
       - "8000:8000"
     depends_on:
       - db
+      - redis
     environment:
       - DEBUG=1
+      - DJANGO_SECRET_KEY=your-secret-key
       - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres
+      - REDIS_URL=redis://redis:6379/0
 
   db:
     image: postgres:15
@@ -27,6 +28,13 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    container_name: scrum_poker_redis
+    restart: always
+    ports:
+      - "6379:6379"
 
 volumes:
   postgres_data:
