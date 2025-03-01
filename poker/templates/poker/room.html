@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scrum Poker Room</title>
+    <script>
+        let roomName = "{{ room_name }}";
+        let socket = new WebSocket(`ws://${window.location.host}/ws/poker/${roomName}/`);
+
+        socket.onmessage = function(event) {
+            let data = JSON.parse(event.data);
+            let voteList = document.getElementById("votes");
+            let newVote = document.createElement("li");
+            newVote.textContent = `${data.username}: ${data.vote}`;
+            voteList.appendChild(newVote);
+        };
+
+        function sendVote(vote) {
+            let username = document.getElementById("username").value || "Anonymous";
+            socket.send(JSON.stringify({"vote": vote, "username": username}));
+        }
+    </script>
+</head>
+<body>
+    <h1>Scrum Poker - Room {{ room_name }}</h1>
+    <input type="text" id="username" placeholder="Enter your name">
+    <br><br>
+
+    <button onclick="sendVote(1)">1</button>
+    <button onclick="sendVote(2)">2</button>
+    <button onclick="sendVote(3)">3</button>
+    <button onclick="sendVote(5)">5</button>
+    <button onclick="sendVote(8)">8</button>
+    <button onclick="sendVote(13)">13</button>
+
+    <h2>Votes:</h2>
+    <ul id="votes"></ul>
+</body>
+</html>

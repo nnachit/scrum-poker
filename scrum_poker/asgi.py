@@ -8,9 +8,18 @@ https://docs.djangoproject.com/en/5.1/howto/deployment/asgi/
 """
 
 import os
-
 from django.core.asgi import get_asgi_application
+from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.auth import AuthMiddlewareStack
+from poker.routing import websocket_urlpatterns  # Importe les routes WebSocket
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'scrum_poker.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "scrum_poker.settings")
 
-application = get_asgi_application()
+application = ProtocolTypeRouter(
+    {
+        "http": get_asgi_application(),
+        "websocket": AuthMiddlewareStack(
+            URLRouter(websocket_urlpatterns)
+        ),
+    }
+)

@@ -36,8 +36,10 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    "daphne",
+    "channels",
+    "poker",
     'django.contrib.staticfiles',
-    'poker',
 ]
 
 MIDDLEWARE = [
@@ -68,8 +70,17 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'scrum_poker.wsgi.application'
+ASGI_APPLICATION = "scrum_poker.asgi.application"
 
+# Configuration Redis pour Django Channels
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("redis", 6379)],
+        },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -100,6 +111,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+STATIC_ROOT = 'static'
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
