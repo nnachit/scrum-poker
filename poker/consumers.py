@@ -6,6 +6,7 @@ class ScrumPokerConsumer(AsyncWebsocketConsumer):
         super().__init__(args, kwargs)
         self.room_name = None
         self.room_group_name = None
+        self.votes = {}
 
     async def connect(self):
         """Handles a new WebSocket connection."""
@@ -41,4 +42,7 @@ class ScrumPokerConsumer(AsyncWebsocketConsumer):
         vote = event["vote"]
         username = event["username"]
 
-        await self.send(text_data=json.dumps({"username": username, "vote": vote}))
+        # Store usernames and votes
+        self.votes[username] = vote
+
+        await self.send(text_data=json.dumps({"username": username, "vote": "voted"}))
