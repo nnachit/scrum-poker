@@ -12,14 +12,31 @@
             let data = JSON.parse(event.data);
             let voteList = document.getElementById("votes");
             let newVote = document.createElement("li");
+
             newVote.textContent = `${data.username}: ${data.vote}`;
             voteList.appendChild(newVote);
+
+            if (data.action === "reveal") {
+                voteList.innerHTML = ""
+                data.votes.forEach(vote => {
+                    const newVote = document.createElement("li")
+                    newVote.textContent = `${vote.username}: ${vote.vote}`;
+                    voteList.appendChild(newVote);
+                })
+
+                document.querySelectorAll(".vote-btn").forEach(btn => {
+                    btn.disabled = true;
+                });
+                document.getElementById("reveal-votes-btn").disabled = true;
+            }
         };
 
         function sendVote(vote) {
             let username = document.getElementById("username").value || "Anonymous";
-            socket.send(JSON.stringify({"vote": vote, "username": username}));
+            socket.send(JSON.stringify({action: "vote", "vote": vote, "username": username}));
         }
+
+
     </script>
 </head>
 <body>
@@ -33,8 +50,19 @@
     <button onclick="sendVote(5)">5</button>
     <button onclick="sendVote(8)">8</button>
     <button onclick="sendVote(13)">13</button>
+    <button id="reveal-votes-btn">Reveal Votes</button>
+
 
     <h2>Votes:</h2>
     <ul id="votes"></ul>
+
+    <script>
+        document.getElementById("reveal-votes-btn").addEventListener("click", function () {
+            socket.send(JSON.stringify({
+                action: "reveal"
+            }));
+        });
+    </script>
+
 </body>
 </html>

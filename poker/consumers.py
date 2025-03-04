@@ -3,7 +3,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 
 class ScrumPokerConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
-        super().__init__(args, kwargs)
+        super().__init__(*args, **kwargs)
         self.room_name = None
         self.room_group_name = None
         self.votes = {}
@@ -24,25 +24,32 @@ class ScrumPokerConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data=None, bytes_data=None):
         """Receives a vote from a user and broadcasts it to the group."""
         data = json.loads(text_data)
-        vote = data.get("vote")
-        username = data.get("username", "Anonymous")
+        action = data.get("action")
 
-        # Send vote to the group
-        await self.channel_layer.group_send(
-            self.room_group_name,
-            {
-                "type": "vote_message",
-                "vote": vote,
-                "username": username,
-            },
-        )
+        if action == "vote":
+            username = data.get("username", "Anonymous")
+            vote = data.get("vote")
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {"type": "vote_received", "username": username, "vote": vote}
+            )
+        elif action == "reveal":
+            await self.channel_layer.group_send(
+                self.room_group_name, {"type": "reveal_votes"}
+            )
 
-    async def vote_message(self, event):
+    async def vote_received(self, event):
         """Sends the received vote message to all connected clients."""
-        vote = event["vote"]
-        username = event["username"]
+        self.votes[event["username"]] = event["vote"]
+        await self.send(text_data=json.dumps(
+                {"action": "vote",
+                "username": event["username"],
+                "vote": "hidden"  # we don't display the vote yet
+        }))
 
-        # Store usernames and votes
-        self.votes[username] = vote
-
-        await self.send(text_data=json.dumps({"username": username, "vote": "voted"}))
+    async def reveal_votes(self, event):
+        data ={
+            "action": "reveal",
+            "votes": [{"username": user, "vote": vote} for user, vote in self.votes.items()]
+        }
+        await self.send(text_data=json.dumps(data))
