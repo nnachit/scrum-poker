@@ -1,9 +1,41 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scrum Poker Room</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn {
+            background: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        ul {
+           list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+    </style>
     <script>
         let roomName = "{{ room_name }}";
         let socket = new WebSocket(`ws://${window.location.host}/ws/poker/${roomName}/`);
@@ -35,27 +67,25 @@
             let username = document.getElementById("username").value || "Anonymous";
             socket.send(JSON.stringify({action: "vote", "vote": vote, "username": username}));
         }
-
-
     </script>
 </head>
 <body>
-    <h1>Scrum Poker - Room {{ room_name }}</h1>
-    <input type="text" id="username" placeholder="Enter your name">
-    <br><br>
+    <div class="container">
+        <h1>Scrum Poker - Room : {{ room_name }}</h1>
+        <label for="username"></label><input type="text" id="username" placeholder="Enter your name">
+        <br><br>
 
-    <button onclick="sendVote(1)">1</button>
-    <button onclick="sendVote(2)">2</button>
-    <button onclick="sendVote(3)">3</button>
-    <button onclick="sendVote(5)">5</button>
-    <button onclick="sendVote(8)">8</button>
-    <button onclick="sendVote(13)">13</button>
-    <button id="reveal-votes-btn">Reveal Votes</button>
+        <button onclick="sendVote(1)">1</button>
+        <button onclick="sendVote(2)">2</button>
+        <button onclick="sendVote(3)">3</button>
+        <button onclick="sendVote(5)">5</button>
+        <button onclick="sendVote(8)">8</button>
+        <button onclick="sendVote(13)">13</button>
+        <button id="reveal-votes-btn">Reveal Votes</button>
 
-
-    <h2>Votes:</h2>
-    <ul id="votes"></ul>
-
+        <h2>Votes</h2>
+        <ul id="votes"></ul>
+    </div>
     <script>
         document.getElementById("reveal-votes-btn").addEventListener("click", function () {
             socket.send(JSON.stringify({
@@ -63,6 +93,5 @@
             }));
         });
     </script>
-
 </body>
 </html>
